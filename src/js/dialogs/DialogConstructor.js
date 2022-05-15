@@ -28,6 +28,7 @@ static constructProperty(property) {
         case 'checkbox': return `<ui-checkbox bind="${property.name}" checked="${property.value}"></ui-checkbox>`;
         case 'color-chooser': return `<ui-color-chooser bind="${property.name}" value="${property.value}"></ui-color-chooser>`;
         case 'transfer-function': return `<ui-transfer-function bind="${property.name}"></ui-transfer-function>`;
+        case 'radio': return '<div><input type="radio" id="html" name="fav_language" value="HTML"> <label for="html">HTML</label><br> <input type="radio" id="html2" name="fav_language" value="HTML2"> <label for="html2">HTMLw</label><br></div>'
         default: return `<div></div>`;
     }
 }

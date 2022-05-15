@@ -27,6 +27,16 @@ constructor(gl, volume, environmentTexture, options) {
             min: 1,
         },
         {
+            name: 'moder',
+            label: 'Upgrade',
+            type: 'radio',
+            type: 'spinner',
+            value: 0,
+            min: 0,
+            max: 2
+
+        },
+        {
             name: 'transferFunction',
             label: 'Transfer function',
             type: 'transfer-function',
@@ -34,9 +44,13 @@ constructor(gl, volume, environmentTexture, options) {
         },
     ]);
 
+    Object.assign(this, {
+      _type : 7
+    }, options);
+
     this.addEventListener('change', e => {
         const { name, value } = e.detail;
-
+        console.log(e);
         if (name === 'transferFunction') {
             this.setTransferFunction(this.transferFunction);
         }
@@ -44,12 +58,15 @@ constructor(gl, volume, environmentTexture, options) {
         if ([
             'extinction',
             'slices',
+            'moder',
         ].includes(name)) {
             this.reset();
         }
     });
 
     this._programs = WebGL.buildPrograms(this._gl, SHADERS.renderers.EAM, MIXINS);
+
+    this._frameNumber = 1;
 }
 
 destroy() {
@@ -68,6 +85,9 @@ _resetFrame() {
     gl.useProgram(program);
 
     gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+
+    this._frameNumber = 1;
+
 }
 
 _generateFrame() {
@@ -76,6 +96,7 @@ _generateFrame() {
     const { program, uniforms } = this._programs.generate;
     gl.useProgram(program);
 
+    var randomm = Math.random();
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_3D, this._volume.getTexture());
     gl.activeTexture(gl.TEXTURE1);
@@ -85,7 +106,10 @@ _generateFrame() {
     gl.uniform1i(uniforms.uTransferFunction, 1);
     gl.uniform1f(uniforms.uStepSize, 1 / this.slices);
     gl.uniform1f(uniforms.uExtinction, this.extinction);
-    gl.uniform1f(uniforms.uOffset, Math.random());
+    gl.uniform1f(uniforms.uOffset, randomm);
+    gl.uniform1f(uniforms.oMode, this.moder);
+    console.log(randomm);
+
     const mvpit = this.calculateMVPInverseTranspose();
     gl.uniformMatrix4fv(uniforms.uMvpInverseMatrix, false, mvpit.m);
 
@@ -106,7 +130,12 @@ _integrateFrame() {
     gl.uniform1i(uniforms.uAccumulator, 0);
     gl.uniform1i(uniforms.uFrame, 1);
 
+    console.log(this._frameNumber)
+    gl.uniform1f(uniforms.uInvFrameNumber, 1 / this._frameNumber);
+
     gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+
+    this._frameNumber += 1;
 }
 
 _renderFrame() {
@@ -117,7 +146,6 @@ _renderFrame() {
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this._accumulationBuffer.getAttachments().color[0]);
-
     gl.uniform1i(uniforms.uAccumulator, 0);
 
     gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
