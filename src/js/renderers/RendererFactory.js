@@ -12,7 +12,7 @@ export function RendererFactory(which) {
         case 'mip': return MIPRenderer;
         case 'iso': return ISORenderer;
         case 'eam': return EAMRenderer;
-        case 'eamumc': return EAMMCRenderer;
+        case 'eammc': return EAMMCRenderer;
         case 'lao': return LAORenderer;
         case 'mcs': return MCSRenderer;
         case 'mcm': return MCMRenderer;
